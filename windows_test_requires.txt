@@ -1,9 +1,9 @@
-pandas==1.0.1
+pandas==1.0.3
 numpy
 pyarrow>=0.13.0
 dask[complete]>=2.1.0
 distributed>=2.3.2
-psutil==5.4.8
+psutil==5.6.6
 xarray
 Jinja2
 pathlib
@@ -15,6 +15,7 @@ coverage<5.0
 pytest-cov
 pytest-testmon
 pytest-custom_exit_code
+pytest-xdist
 feather-format
 lxml
 openpyxl

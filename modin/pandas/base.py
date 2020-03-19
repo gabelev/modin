@@ -1094,8 +1094,14 @@ class BasePandasDataset(object):
                 deduplicated : DataFrame
         """
         inplace = validate_bool_kwarg(inplace, "inplace")
-        if kwargs.get("subset", None) is not None:
-            duplicates = self.duplicated(keep=keep, subset=kwargs.get("subset"))
+        subset = kwargs.get("subset", None)
+        if subset is not None:
+            if is_list_like(subset):
+                if not isinstance(subset, list):
+                    subset = list(subset)
+            else:
+                subset = [subset]
+            duplicates = self.duplicated(keep=keep, subset=subset)
         else:
             duplicates = self.duplicated(keep=keep)
         indices = duplicates.values.nonzero()[0]
@@ -3380,17 +3386,16 @@ class BasePandasDataset(object):
         default_behaviors = [
             "__init__",
             "__class__",
-            "index",
             "_get_index",
             "_set_index",
             "empty",
             "index",
             "columns",
             "name",
-            "_get_name",
-            "_set_name",
             "dtypes",
             "dtype",
+            "_get_name",
+            "_set_name",
             "_default_to_pandas",
             "_query_compiler",
             "_to_pandas",
