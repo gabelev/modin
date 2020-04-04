@@ -1,3 +1,16 @@
+# Licensed to Modin Development Team under one or more contributor license agreements.
+# See the NOTICE file distributed with this work for additional information regarding
+# copyright ownership.  The Modin Development Team licenses this file to you under the
+# Apache License, Version 2.0 (the "License"); you may not use this file except in
+# compliance with the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under
+# the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific language
+# governing permissions and limitations under the License.
+
 import numpy as np
 import pandas
 from pandas.core.common import apply_if_callable, is_bool_indexer
@@ -595,18 +608,27 @@ class Series(BasePandasDataset):
     ):
         from .groupby import SeriesGroupBy
 
+        if not as_index:
+            raise TypeError("as_index=False only valid with DataFrame")
+        # SeriesGroupBy expects a query compiler object if it is available
+        if isinstance(by, Series):
+            by = by._query_compiler
+        elif callable(by):
+            by = by(self.index)
+        elif by is None and level is None:
+            raise TypeError("You have to supply one of 'by' and 'level'")
         return SeriesGroupBy(
-            self._default_to_pandas(
-                pandas.Series.groupby,
-                by=by,
-                axis=axis,
-                level=level,
-                as_index=as_index,
-                sort=sort,
-                group_keys=group_keys,
-                squeeze=squeeze,
-                observed=observed,
-            )
+            self,
+            by,
+            axis,
+            level,
+            as_index,
+            sort,
+            group_keys,
+            squeeze,
+            idx_name=None,
+            observed=observed,
+            drop=False,
         )
 
     def gt(self, other, level=None, fill_value=None, axis=0):

@@ -1,3 +1,16 @@
+# Licensed to Modin Development Team under one or more contributor license agreements.
+# See the NOTICE file distributed with this work for additional information regarding
+# copyright ownership.  The Modin Development Team licenses this file to you under the
+# Apache License, Version 2.0 (the "License"); you may not use this file except in
+# compliance with the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under
+# the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific language
+# governing permissions and limitations under the License.
+
 from itertools import groupby
 import numpy as np
 from operator import itemgetter
@@ -998,6 +1011,38 @@ class BasePandasFrame(object):
                 self._row_lengths_cache,
                 self._column_widths_cache,
             )
+
+    def broadcast_apply(self, axis, func, other, preserve_labels=True, dtypes=None):
+        """Broadcast partitions of other dataframe partitions and apply a function.
+
+        Args:
+            axis: The axis to broadcast over.
+            func: The function to apply.
+            other: The Modin DataFrame to broadcast.
+            preserve_labels: Whether or not to keep labels from this Modin DataFrame.
+            dtypes: "copy" or None. Whether to keep old dtypes or infer new dtypes from
+                data.
+
+        Returns:
+             A new Modin DataFrame
+        """
+        assert preserve_labels, "`preserve_labels=False` Not Yet Implemented"
+        # Only sort the indices if they do not match
+        left_parts, right_parts, joined_index = self._copartition(
+            axis, other, "left", sort=not self.axes[axis].equals(other.axes[axis])
+        )
+        # unwrap list returned by `copartition`.
+        right_parts = right_parts[0]
+        new_frame = self._frame_mgr_cls.broadcast_apply(
+            axis, func, left_parts, right_parts
+        )
+        if dtypes == "copy":
+            dtypes = self._dtypes
+        new_index = self.index
+        new_columns = self.columns
+        return self.__constructor__(
+            new_frame, new_index, new_columns, None, None, dtypes=dtypes
+        )
 
     def _copartition(self, axis, other, how, sort, force_repartition=False):
         """Copartition two dataframes.

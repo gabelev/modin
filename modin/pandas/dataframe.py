@@ -1,3 +1,16 @@
+# Licensed to Modin Development Team under one or more contributor license agreements.
+# See the NOTICE file distributed with this work for additional information regarding
+# copyright ownership.  The Modin Development Team licenses this file to you under the
+# Apache License, Version 2.0 (the "License"); you may not use this file except in
+# compliance with the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under
+# the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific language
+# governing permissions and limitations under the License.
+
 import pandas
 from pandas.core.common import apply_if_callable, is_bool_indexer
 from pandas.core.dtypes.common import (
@@ -438,10 +451,13 @@ class DataFrame(BasePandasDataset):
     T = property(transpose)
 
     def add(self, other, axis="columns", level=None, fill_value=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).add(
-            other, axis=axis, level=level, fill_value=fill_value
+        return self._binary_op(
+            "add",
+            other,
+            axis=axis,
+            level=level,
+            fill_value=fill_value,
+            broadcast=isinstance(other, Series),
         )
 
     def append(self, other, ignore_index=False, verify_integrity=False, sort=False):
@@ -561,9 +577,9 @@ class DataFrame(BasePandasDataset):
         return self._default_to_pandas(pandas.DataFrame.cov, min_periods=min_periods)
 
     def eq(self, other, axis="columns", level=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).eq(other, axis=axis, level=level)
+        return self._binary_op(
+            "eq", other, axis=axis, level=level, broadcast=isinstance(other, Series)
+        )
 
     def equals(self, other):
         """
@@ -647,10 +663,13 @@ class DataFrame(BasePandasDataset):
             )
 
     def floordiv(self, other, axis="columns", level=None, fill_value=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).floordiv(
-            other, axis=axis, level=level, fill_value=fill_value
+        return self._binary_op(
+            "floordiv",
+            other,
+            axis=axis,
+            level=level,
+            fill_value=fill_value,
+            broadcast=isinstance(other, Series),
         )
 
     @classmethod
@@ -687,14 +706,14 @@ class DataFrame(BasePandasDataset):
         )
 
     def ge(self, other, axis="columns", level=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).ge(other, axis=axis, level=level)
+        return self._binary_op(
+            "ge", other, axis=axis, level=level, broadcast=isinstance(other, Series)
+        )
 
     def gt(self, other, axis="columns", level=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).gt(other, axis=axis, level=level)
+        return self._binary_op(
+            "gt", other, axis=axis, level=level, broadcast=isinstance(other, Series)
+        )
 
     def head(self, n=5):
         if n == 0:
@@ -1019,17 +1038,17 @@ class DataFrame(BasePandasDataset):
         return new_frame
 
     def le(self, other, axis="columns", level=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).le(other, axis=axis, level=level)
+        return self._binary_op(
+            "le", other, axis=axis, level=level, broadcast=isinstance(other, Series)
+        )
 
     def lookup(self, row_labels, col_labels):
         return self._default_to_pandas(pandas.DataFrame.lookup, row_labels, col_labels)
 
     def lt(self, other, axis="columns", level=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).lt(other, axis=axis, level=level)
+        return self._binary_op(
+            "lt", other, axis=axis, level=level, broadcast=isinstance(other, Series)
+        )
 
     def melt(
         self,
@@ -1142,25 +1161,31 @@ class DataFrame(BasePandasDataset):
             )
 
     def mod(self, other, axis="columns", level=None, fill_value=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).mod(
-            other, axis=axis, level=level, fill_value=fill_value
+        return self._binary_op(
+            "mod",
+            other,
+            axis=axis,
+            level=level,
+            fill_value=fill_value,
+            broadcast=isinstance(other, Series),
         )
 
     def mul(self, other, axis="columns", level=None, fill_value=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).mul(
-            other, axis=axis, level=level, fill_value=fill_value
+        return self._binary_op(
+            "mul",
+            other,
+            axis=axis,
+            level=level,
+            fill_value=fill_value,
+            broadcast=isinstance(other, Series),
         )
 
     rmul = multiply = mul
 
     def ne(self, other, axis="columns", level=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).ne(other, axis=axis, level=level)
+        return self._binary_op(
+            "ne", other, axis=axis, level=level, broadcast=isinstance(other, Series)
+        )
 
     def nlargest(self, n, columns, keep="first"):
         return self._default_to_pandas(pandas.DataFrame.nlargest, n, columns, keep=keep)
@@ -1237,9 +1262,16 @@ class DataFrame(BasePandasDataset):
 
     def pow(self, other, axis="columns", level=None, fill_value=None):
         if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).pow(
-            other, axis=axis, level=level, fill_value=fill_value
+            return self._default_to_pandas(
+                "pow", other, axis=axis, level=level, fill_value=fill_value
+            )
+        return self._binary_op(
+            "pow",
+            other,
+            axis=axis,
+            level=level,
+            fill_value=fill_value,
+            broadcast=isinstance(other, Series),
         )
 
     def prod(
@@ -1370,38 +1402,57 @@ class DataFrame(BasePandasDataset):
             return renamed
 
     def rfloordiv(self, other, axis="columns", level=None, fill_value=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).rfloordiv(
-            other, axis=axis, level=level, fill_value=fill_value
+        return self._binary_op(
+            "rfloordiv",
+            other,
+            axis=axis,
+            level=level,
+            fill_value=fill_value,
+            broadcast=isinstance(other, Series),
         )
 
     def rmod(self, other, axis="columns", level=None, fill_value=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).rmod(
-            other, axis=axis, level=level, fill_value=fill_value
+        return self._binary_op(
+            "rmod",
+            other,
+            axis=axis,
+            level=level,
+            fill_value=fill_value,
+            broadcast=isinstance(other, Series),
         )
 
     def rpow(self, other, axis="columns", level=None, fill_value=None):
         if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).rpow(
-            other, axis=axis, level=level, fill_value=fill_value
+            return self._default_to_pandas(
+                "rpow", other, axis=axis, level=level, fill_value=fill_value
+            )
+        return self._binary_op(
+            "rpow",
+            other,
+            axis=axis,
+            level=level,
+            fill_value=fill_value,
+            broadcast=isinstance(other, Series),
         )
 
     def rsub(self, other, axis="columns", level=None, fill_value=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).rsub(
-            other, axis=axis, level=level, fill_value=fill_value
+        return self._binary_op(
+            "rsub",
+            other,
+            axis=axis,
+            level=level,
+            fill_value=fill_value,
+            broadcast=isinstance(other, Series),
         )
 
     def rtruediv(self, other, axis="columns", level=None, fill_value=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).rtruediv(
-            other, axis=axis, level=level, fill_value=fill_value
+        return self._binary_op(
+            "rtruediv",
+            other,
+            axis=axis,
+            level=level,
+            fill_value=fill_value,
+            broadcast=isinstance(other, Series),
         )
 
     rdiv = rtruediv
@@ -1537,10 +1588,13 @@ class DataFrame(BasePandasDataset):
         )
 
     def sub(self, other, axis="columns", level=None, fill_value=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).sub(
-            other, axis=axis, level=level, fill_value=fill_value
+        return self._binary_op(
+            "sub",
+            other,
+            axis=axis,
+            level=level,
+            fill_value=fill_value,
+            broadcast=isinstance(other, Series),
         )
 
     subtract = sub
@@ -1718,10 +1772,13 @@ class DataFrame(BasePandasDataset):
         )
 
     def truediv(self, other, axis="columns", level=None, fill_value=None):
-        if isinstance(other, Series):
-            other = other._to_pandas()
-        return super(DataFrame, self).truediv(
-            other, axis=axis, level=level, fill_value=fill_value
+        return self._binary_op(
+            "truediv",
+            other,
+            axis=axis,
+            level=level,
+            fill_value=fill_value,
+            broadcast=isinstance(other, Series),
         )
 
     div = divide = truediv

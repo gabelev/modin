@@ -1,3 +1,16 @@
+# Licensed to Modin Development Team under one or more contributor license agreements.
+# See the NOTICE file distributed with this work for additional information regarding
+# copyright ownership.  The Modin Development Team licenses this file to you under the
+# Apache License, Version 2.0 (the "License"); you may not use this file except in
+# compliance with the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under
+# the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific language
+# governing permissions and limitations under the License.
+
 import numpy as np
 from numpy import nan
 import pandas
@@ -122,8 +135,6 @@ class BasePandasDataset(object):
         if isinstance(other, BasePandasDataset):
             return other._query_compiler
         elif is_list_like(other):
-            if isinstance(other, pandas.Series):
-                other = other.reindex(self.axes[axis])
             if axis == 0:
                 if len(other) != len(self._query_compiler.index):
                     raise ValueError(
@@ -202,6 +213,8 @@ class BasePandasDataset(object):
         else:
             axis = 0
         if kwargs.get("level", None) is not None:
+            # Broadcast is an internally used argument
+            kwargs.pop("broadcast", None)
             return self._default_to_pandas(
                 getattr(getattr(pandas, self.__name__), op), other, **kwargs
             )
@@ -325,7 +338,7 @@ class BasePandasDataset(object):
 
         Args:
             other: What to add this this DataFrame.
-            axis: The axis to apply addition over. Only applicaable to Series
+            axis: The axis to apply addition over. Only applicable to Series
                 or list 'other'.
             level: A level in the multilevel axis to add over.
             fill_value: The value to fill NaN.

@@ -1,3 +1,16 @@
+# Licensed to Modin Development Team under one or more contributor license agreements.
+# See the NOTICE file distributed with this work for additional information regarding
+# copyright ownership.  The Modin Development Team licenses this file to you under the
+# Apache License, Version 2.0 (the "License"); you may not use this file except in
+# compliance with the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under
+# the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific language
+# governing permissions and limitations under the License.
+
 import numpy as np
 import pandas
 
@@ -81,6 +94,40 @@ class BaseFrameManager(object):
             ]
         )
         return cls.map_axis_partitions(axis, new_partitions, reduce_func)
+
+    @classmethod
+    def broadcast_apply(cls, axis, apply_func, left, right):
+        """Broadcast the right partitions to left and apply a function.
+
+        Note: This will often be overridden by implementations. It materializes the
+            entire partitions of the right and applies them to the left through `apply`.
+
+        Args:
+            axis: The axis to apply and broadcast over.
+            apply_func: The function to apply.
+            left: The left partitions.
+            right: The right partitions.
+
+        Returns:
+            A new `np.array` of partition objects.
+        """
+        right_parts = np.squeeze(right)
+
+        [obj.drain_call_queue() for obj in right_parts]
+        return np.array(
+            [
+                [
+                    part.apply(
+                        apply_func,
+                        r=right_parts[col_idx].get()
+                        if axis
+                        else right_parts[row_idx].get(),
+                    )
+                    for col_idx, part in enumerate(left[row_idx])
+                ]
+                for row_idx in range(len(left))
+            ]
+        )
 
     @classmethod
     def map_partitions(cls, partitions, map_func):
