@@ -1,10 +1,58 @@
-Architecture
-============
+System Architecture
+===================
 
-In this documentation page, we will lay out the overall architecture for Modin, as well
-as go into detail about the implementation and other important details. This document
-also contains important reference information for those interested in contributing new
-functionality, bugfixes, and enhancements.
+In this documentation page, we will lay out the overall system architecture for
+Modin, as well as go into detail about the component design, implementation and
+other important details. This document also contains important reference
+information for those interested in contributing new functionality, bugfixes
+and enhancements.
+
+High-Level Architectural View
+-----------------------------
+The diagram below outlines the general layered view to the components of Modin
+with a short description of each major section of the documentation following.
+
+
+.. image:: img/modin_architecture.png
+   :align: center
+
+Modin is logically separated into different layers that represent the hierarchy of a
+typical Database Management System. Abstracting out each component allows us to
+individually optimize and swap out components without affecting the rest of the system.
+We can implement, for example, new compute kernels that are optimized for a certain type
+of data and can simply plug it in to the existing infrastructure by implementing a small
+interface. It can still be distributed by our choice of compute engine with the
+logic internally.
+
+10000 Meters Component View
+---------------------------
+If we look to the overall class structure of the Modin system from very top, it will
+look to something like this(clickable):
+
+.. image:: img/10000_meter.png
+   :align: center
+
+Though it looks gibberish, if we scroll around we will see that it has quite well
+organized and logically sound clusters. From the packaging view there are several
+main interacting components comprising the overall architecture:
+
+* Engines module: Defines the the standard interfaces through the Base component: IO, Frame and Series classes.
+  Defines for the paritioning is done controlle by Partition Manager through AxisPartition and the standard API for the
+  Frame and Series handling.Described below. Ray, Dask and Python implementation derived from Base. Python
+  component implements Pandas.
+* Backends module: defines API for the Query Compiler and implementation through Pandas and experimental implementation
+  through PyArrow.
+* Pandas module Pandas API conformance layer. Implementes all the Pandas APIs in the Modin.
+
+.. image:: img/base_class.png
+   :align: center
+
+
+.. automodule:: modin.engines.base.frame.data
+   :no-undoc-members:
+.. autoclass:: BasePandasFrame
+   :members:
+
 
 DataFrame Partitioning
 ----------------------
@@ -32,21 +80,6 @@ not be affected by this scalability limit. **Important note**: If you are using 
 default index (``pandas.RangeIndex``) there is a fixed memory overhead (~200 bytes) and
 there will be no scalability issues with the index.
 
-System Architecture
--------------------
-
-The figure below outlines the general architecture for the implementation of Modin.
-
-.. image:: img/modin_architecture.png
-   :align: center
-
-Modin is logically separated into different layers that represent the hierarchy of a
-typical Database Management System. Abstracting out each component allows us to
-individually optimize and swap out components without affecting the rest of the system.
-We can implement, for example, new compute kernels that are optimized for a certain type
-of data and can simply plug it in to the existing infrastructure by implementing a small
-interface. It can still be distributed by our choice of compute engine with the
-logic internally.
 
 API
 """

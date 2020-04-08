@@ -28,7 +28,19 @@ release = version
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = []
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    'sphinx.ext.todo',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.githubpages',
+    'sphinx.ext.graphviz',
+    'sphinxcontrib.plantuml',
+    "sphinx_issues",
+]
+
+#plantuml = 'plantuml -config %s'  % os.path.join(os.path.dirname(__file__), 'plantuml.cfg')
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -67,7 +79,7 @@ current_branch = "nature"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "nature"
+html_theme = "sphinx_rtd_theme"
 
 html_logo = "img/MODIN_ver2.png"
 
@@ -75,7 +87,8 @@ html_logo = "img/MODIN_ver2.png"
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options = {"sidebarwidth": 270}
+
+html_theme_options = {"sidebarwidth": 270, 'collapse_navigation': False}
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -88,3 +101,5 @@ html_theme_options = {"sidebarwidth": 270}
 html_sidebars = {
     "**": ["globaltoc.html", "relations.html", "sourcelink.html", "searchbox.html"]
 }
+
+issues_github_path = "modin-project/modin"

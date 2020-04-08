@@ -13,8 +13,18 @@ started.
 
 Also, feel free to join the discussions on the `developer mailing list`_.
 
-LINUX KERNEL CERTIFICATE OF ORIGIN V 1.1
-----------------------------------------
+Certificate of Origin
+---------------------
+
+To keep a clear track of who did what, we use a `sign-off` procedure (same requirements 
+for using the signed-off-by process as the Linux kernel has 
+https://www.kernel.org/doc/html/v4.17/process/submitting-patches.html) on patches or pull 
+requests that are being sent. The sign-off is a simple line at the end of the explanation 
+for the patch, which certifies that you wrote it or otherwise have the right to pass it 
+on as an open-source patch. The rules are pretty simple: if you can certify the below:
+
+CERTIFICATE OF ORIGIN V 1.1
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 "By making a contribution to this project, I certify that:
 
 1.) The contribution was created in whole or in part by me and I have the right to
@@ -31,31 +41,23 @@ record of the contribution (including all personal information I submit with it,
 including my sign-off) is maintained indefinitely and may be redistributed consistent
 with this project or the open source license(s) involved."
 
-How to sign-off commits
------------------------
-
-Modin requires a sign-off message in the following format appear on each commit in the
-pull request:
 
 .. code-block:: bash
 
    This is my commit message
 
-   Signed-off-by: Random J Developer <random@developer.example.org>
+   Signed-off-by: Awesome Developer <developer@example.org>
 
 
-We have the same requirements for using the signed-off-by process as the Linux kernel has.
-
-In short, you need to include a signed-off-by tag in every patch:
-
-Signed-off-by  is a developer's certification that he or she has the right to
-submit the patch for inclusion into the project. It is an agreement to the Developer's
-Certificate of Origin (above). Code without a proper signoff cannot be merged into the
+.
+Code without a proper signoff cannot be merged into the
 master branch. Note: You must use your real name (sorry, no pseudonyms or anonymous
 contributions.)
 
 The text can either be manually added to your commit body, or you can add either ``-s``
 or ``--signoff`` to your usual ``git commit`` commands:
+
+
 
 .. code-block:: bash
 
@@ -67,8 +69,8 @@ this, you can use the following commands:
 
 .. code-block:: bash
 
-   git config --global user.name "FIRST_NAME LAST_NAME"
-   git config --global user.email "MY_NAME@example.com"
+   git config --global user.name "Awesome Developer"
+   git config --global user.email "awesome.developer.@example.org"
 
 If you have authored a commit that is missing the signed-off-by line, you can amend your
 commits and push them to GitHub.
@@ -83,14 +85,15 @@ after this with ``git push -f``.
 Development Dependencies
 ------------------------
 
-We recommend doing development in a virtualenv, though this decision is ultimately
-yours. You will want to run the following in order to install all of the required
+We recommend doing development in a virtualenv or conda environment, though this decision 
+is ultimately yours. You will want to run the following in order to install all of the required
 dependencies for running the tests and formatting the code:
 
 .. code-block:: bash
 
   pip install -r requirements.txt
 
+For developments under Windows, dependencies can be found in 'env_windows.yml' file. 
 
 Code Formatting and Lint
 ------------------------

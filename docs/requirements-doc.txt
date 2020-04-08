@@ -10,6 +10,8 @@ recommonmark
 sphinx
 sphinx-click
 sphinx_rtd_theme
+sphinx-issues
+sphinxcontrib-plantuml>=0.17.1
 pandas
 modin[all]
 

@@ -129,6 +129,13 @@ nature, you get a fast DataFrame at 1MB and 1TB+.
    out_of_core
 
 .. toctree::
+   :caption: Developer Documentation
+
+   developer/contributing
+   developer/architecture
+
+
+.. toctree::
    :caption: Supported APIs
 
    supported_apis/index
@@ -144,12 +151,6 @@ nature, you get a fast DataFrame at 1MB and 1TB+.
    UsingPandasonDask/index
    UsingPyarrowonRay/index
    UsingSQLonRay/index
-
-.. toctree::
-   :caption: Contributing to Modin
-
-   contributing
-   architecture
 
 .. toctree::
    :caption: Help

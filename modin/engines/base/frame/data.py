@@ -803,7 +803,7 @@ class BasePandasFrame(object):
         Args:
             axis: The axis to filter over.
             func: The function to use for the filter. This function should filter the
-                data itself.
+            data itself.
 
         Returns:
             A new dataframe.
@@ -1021,7 +1021,7 @@ class BasePandasFrame(object):
             other: The Modin DataFrame to broadcast.
             preserve_labels: Whether or not to keep labels from this Modin DataFrame.
             dtypes: "copy" or None. Whether to keep old dtypes or infer new dtypes from
-                data.
+            data.
 
         Returns:
              A new Modin DataFrame
@@ -1184,9 +1184,9 @@ class BasePandasFrame(object):
             map_func: The map component of the aggregation.
             reduce_func: The reduce component of the aggregation.
             new_index: (optional) The index of the result. We may know this in advance,
-                and if not provided it must be computed.
+            and if not provided it must be computed.
             new_columns: (optional) The columns of the result. We may know this in
-                advance, and if not provided it must be computed.
+            advance, and if not provided it must be computed.
 
         Returns:
              A new dataframe.
